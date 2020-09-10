@@ -39,14 +39,18 @@ async function main() {
   core.info(`Find PR number: ${prNumber}`);
 
   const setCommitStatus = async (url: string) => {
-    await octokit.repos.createCommitStatus({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      sha: gitCommitSha,
-      state: 'success',
-      target_url: url,
-      description: 'success',
-    });
+    try {
+      await octokit.repos.createCommitStatus({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        sha: gitCommitSha,
+        state: 'success',
+        target_url: url,
+        description: 'success',
+      });
+    } catch (e) {
+      core.setFailed(e);
+    }
   };
 
   const commentIfNotForkedRepo = (message: string) => {
@@ -128,7 +132,8 @@ async function main() {
     core.info(`Build time: ${duration} seconds`);
     core.info(`Deploy to ${url}`);
     await exec(`npx surge ./${dist} ${url} --token ${surgeToken}`);
-    setCommitStatus(url);
+    core.info(`Add status`);
+    await setCommitStatus(`https://${url}`);
     commentIfNotForkedRepo(`
 🎊 PR Preview ${gitCommitSha} has been successfully built and deployed to https://${url}
 

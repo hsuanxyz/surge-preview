@@ -128,7 +128,7 @@ async function main() {
     core.info(`Build time: ${duration} seconds`);
     core.info(`Deploy to ${url}`);
     await exec(`npx surge ./${dist} ${url} --token ${surgeToken}`);
-    setCommitStatus(url);
+    setCommitStatus(`https://${url}`);
     commentIfNotForkedRepo(`
 🎊 PR Preview ${gitCommitSha} has been successfully built and deployed to https://${url}
 

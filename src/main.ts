@@ -38,8 +38,8 @@ async function main() {
   }
   core.info(`Find PR number: ${prNumber}`);
 
-  const setCommitStatus = (url: string) => {
-    octokit.repos.createCommitStatus({
+  const setCommitStatus = async (url: string) => {
+    await octokit.repos.createCommitStatus({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       sha: gitCommitSha,
@@ -104,7 +104,6 @@ async function main() {
     ? `https://github.com/${github.context.repo.owner}/${github.context.repo.repo}/runs/${checkRunId}`
     : `https://github.com/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${github.context.runId}`;
 
-  setCommitStatus(url);
   commentIfNotForkedRepo(`
 ⚡️ Deploying PR Preview ${gitCommitSha} to [surge.sh](https://${url}) ... [Build logs](${buildingLogUrl})
 
@@ -129,7 +128,7 @@ async function main() {
     core.info(`Build time: ${duration} seconds`);
     core.info(`Deploy to ${url}`);
     await exec(`npx surge ./${dist} ${url} --token ${surgeToken}`);
-
+    setCommitStatus(url);
     commentIfNotForkedRepo(`
 🎊 PR Preview ${gitCommitSha} has been successfully built and deployed to https://${url}
 

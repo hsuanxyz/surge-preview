@@ -38,6 +38,17 @@ async function main() {
   }
   core.info(`Find PR number: ${prNumber}`);
 
+  const setCommitStatus = (url: string) => {
+    octokit.repos.createCommitStatus({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      sha: gitCommitSha,
+      state: 'success',
+      target_url: url,
+      description: 'success',
+    });
+  };
+
   const commentIfNotForkedRepo = (message: string) => {
     // if it is forked repo, don't comment
     if (fromForkedRepo) {
@@ -93,6 +104,7 @@ async function main() {
     ? `https://github.com/${github.context.repo.owner}/${github.context.repo.repo}/runs/${checkRunId}`
     : `https://github.com/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${github.context.runId}`;
 
+  setCommitStatus(url);
   commentIfNotForkedRepo(`
 ⚡️ Deploying PR Preview ${gitCommitSha} to [surge.sh](https://${url}) ... [Build logs](${buildingLogUrl})
 
